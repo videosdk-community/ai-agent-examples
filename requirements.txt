@@ -1,3 +1,5 @@
 videosdk-plugins-openai
+videosdk-plugins-google
+videosdk-plugins-aws
 videosdk-agents
-
+pyjwt
