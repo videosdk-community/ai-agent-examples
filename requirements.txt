@@ -3,3 +3,6 @@ videosdk-plugins-google
 videosdk-plugins-aws
 videosdk-agents
 pyjwt
+python-dotenv
+requests
+

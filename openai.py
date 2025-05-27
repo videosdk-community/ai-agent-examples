@@ -3,17 +3,16 @@ import aiohttp
 from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
 from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
 from openai.types.beta.realtime.session import  TurnDetection
-from prompts import PROMPTS 
 
-usecase = "Companion"  # Change this to the desired use case
-
-
+##### Set your meeting ID ####
+MEETING_ID = "z8iz-tai1-sj65"  # Replace with your actual meeting ID
 
 class MyVoiceAgent(Agent):
     def __init__(self):
-        prompt_text = PROMPTS.get(usecase, "")
         super().__init__(
-            instructions=prompt_text
+            instructions="""
+You are a helpful voice assistant. Respond to user queries with clear and concise answers. Use a friendly tone and provide relevant information based on the user's request.
+    """,
         )
 
     async def on_enter(self) -> None:
@@ -26,8 +25,6 @@ class MyVoiceAgent(Agent):
 async def main(context: dict):
     model = OpenAIRealtime(
     model="gpt-4o-realtime-preview",
-    # When OPENAI_API_KEY is set in .env - DON'T pass api_key parameter
-    api_key="Your-Openai-api-key",
     config=OpenAIRealtimeConfig(
         voice="alloy", # alloy, ash, ballad, coral, echo, fable, onyx, nova, sage, shimmer, and verse
         modalities=["text", "audio"],
@@ -58,6 +55,9 @@ async def main(context: dict):
 
 if __name__ == "__main__":
     def make_context():
-        return {"meetingId": "your-meeting-d", "name": "VideoSDK's Agent", "videosdk_auth": "your-auth-token"}
+        return {
+        "meetingId": MEETING_ID, 
+        "name": "OpenAI Agent", 
+    }
     
     asyncio.run(main(context=make_context()))
