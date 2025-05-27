@@ -4,7 +4,7 @@
 
 ## Build Real-Time Conversational AI Agents with VideoSDK (Python)
 
-**AI-Agent-Examples** is your all-in-one Python starter kit for building, customizing, and deploying real-time AI voice agents using [VideoSDK](https://videosdk.live/). Leverage the power of OpenAI, Gemini, AWS NovaSonic, and more to create interactive, intelligent assistants for meetings, support, education, and beyond.
+**AI Agent Examples** is your all-in-one Python starter kit for building, customizing, and deploying real-time AI voice agents using [VideoSDK](https://videosdk.live/). Leverage the power of OpenAI, Gemini, AWS NovaSonic, and more to create interactive, intelligent assistants for meetings, support, education, and beyond.
 
 ---
 
