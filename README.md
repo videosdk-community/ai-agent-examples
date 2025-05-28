@@ -46,7 +46,7 @@ To get started, make sure you have:
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/<your-username>/ai-agent-examples.git
+   git clone https://github.com/videosdk-community/ai-agent-examples.git
    cd ai-agent-examples
    ```
 2. **Create your environment file and set up all API keys:**
@@ -65,7 +65,7 @@ To get started, make sure you have:
    python main.py
    # Copy the printed meeting ID
    ```
-5. **Update the meeting ID in any agent script** (e.g., `Basic Agents/recruiter.py`)
+5. **Update the meeting ID in any agent script** (e.g., `basicAgents/recruiter.py`)
 6. **Run your chosen agent:**
    ```sh
    python "basicAgents/recruiter.py"
@@ -80,22 +80,22 @@ To get started, make sure you have:
 | Agent Type | Description | File |
 |------------|-------------|------|
 | 🎙️ **Basic Voice Agent** | Simple voice assistant with different LLM options | [openai.py](openai.py), [gemini.py](gemini.py), [aws.py](aws.py) |
-| 👩‍💼 **Recruiter** | Conducts screening interviews, evaluates communication skills | [recruiter.py](Basic%20Agents/recruiter.py) |
-| 👨‍🏫 **Tutor** | Helps students understand academic concepts | [tutor.py](Basic%20Agents/tutor.py) |
-| 👨‍⚕️ **Doctor** | Provides general medical guidance (not medical advice) | [doctor.py](Basic%20Agents/doctor.py) |
-| 📚 **Storyteller** | Creates stories from user keywords in real-time | [storyteller.py](Basic%20Agents/storyteller.py) |
-| 👯 **Companion** | Friendly, empathetic AI for casual chat | [companion.py](Basic%20Agents/companion.py) |
-| 🌟 **Celebrity** | Role-plays as famous personalities | [celebrity.py](Basic%20Agents/celebrity.py) |
-| 🧘 **Confession** | Nonjudgmental listener for reflection | [confession.py](Basic%20Agents/confession.py) |
-| 🛠️ **Agents with Function Tools** | Agents that can schedule events, track expenses, or take notes using [fuctionTools/](fuctionTools/) | See [fuctionTools/README.md](fuctionTools/README.md) |
+| 👩‍💼 **Recruiter** | Conducts screening interviews, evaluates communication skills | [recruiter.py](basicAgents/recruiter.py) |
+| 👨‍🏫 **Tutor** | Helps students understand academic concepts | [tutor.py](basicAgents/tutor.py) |
+| 👨‍⚕️ **Doctor** | Provides general medical guidance (not medical advice) | [doctor.py](basicAgents/doctor.py) |
+| 📚 **Storyteller** | Creates stories from user keywords in real-time | [storyteller.py](basicAgents/storyteller.py) |
+| 👯 **Companion** | Friendly, empathetic AI for casual chat | [companion.py](basicAgents/companion.py) |
+| 🌟 **Celebrity** | Role-plays as famous personalities | [celebrity.py](basicAgents/celebrity.py) |
+| 🧘 **Confession** | Nonjudgmental listener for reflection | [confession.py](basicAgents/confession.py) |
+| 🛠️ **Agents with Function Tools** | Agents that can schedule events, track expenses, or take notes using [fuctionTools](fuctionTools/) | See [fuctionTools/README.md](fuctionTools/README.md) |
 
 ---
 
 ## Folder Structure & Use Cases
 
-- **basicAgents/**: Ready-to-use AI agents for recruiter, tutor, doctor, storyteller, companion, celebrity, and more. Each agent is a Python script you can run directly.
-- **pythonSDK/**: Core VideoSDK Python integration, including meeting and participant event handlers. Start here to understand the SDK basics and generate meeting IDs.
-- **fuctionTools/**: Utility tools for agents, such as brain dump, event scheduler, and expense tracker. Integrate these with your agents for advanced workflows.
+- **basicAgents**: Ready-to-use AI agents for recruiter, tutor, doctor, storyteller, companion, celebrity, and more. Each agent is a Python script you can run directly.
+- **pythonSDK**: Core VideoSDK Python integration, including meeting and participant event handlers. Start here to understand the SDK basics and generate meeting IDs.
+- **fuctionTools**: Utility tools for agents, such as brain dump, event scheduler, and expense tracker. Integrate these with your agents for advanced workflows.
 - **aws.py, openai.py, gemini.py**: Example scripts for running a basic agent with AWS, OpenAI, or Gemini models.
 
 ---
