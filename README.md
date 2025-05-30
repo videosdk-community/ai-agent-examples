@@ -21,8 +21,7 @@ To get started, make sure you have:
   - **Google:** Add your Google API key as `GOOGLE_API_KEY` in `.env` (required for Gemini and Google function tools)
   - **AWS:** Add your AWS credentials as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_DEFAULT_REGION` in `.env` (for AWS NovaSonic agents)
 - **A VideoSDK meeting ID**
-  - You can generate a meeting ID using the [Create Room API](https://docs.videosdk.live/api-reference/rooms/create-room) or directly from the dashboard
-  - **Or, simply run the provided script:**
+  - **Simply run the provided script:**
     ```sh
     cd PythonSDK
     python main.py
