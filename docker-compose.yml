@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  ai-agent:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Mount the current directory to allow easy updates
+      - .:/app
+    # Default command - can be overridden
+    command: ["list"]
+    # Interactive mode for better user experience
+    stdin_open: true
+    tty: true 

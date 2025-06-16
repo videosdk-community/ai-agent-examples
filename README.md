@@ -30,18 +30,83 @@ To get started, make sure you have:
 
 ---
 
-## Key Features of VideoSDK AI Agents
+## 🐳 Quick Start with Docker (Recommended)
 
-- 🎤 **Real-time Voice & Media**: Agents can listen, speak, and interact live in meetings.
-- 🤖 **Multi-Model Support**: Integrate with OpenAI, Gemini, AWS NovaSonic, and more.
-- 🧩 **Pluggable Agent Types**: Includes recruiter, tutor, doctor, storyteller, and more.
-- 🛠️ **Function Tools**: Extend agent capabilities with event scheduling, expense tracking, and more (see `fuctionTools/`).
-- 🔌 **Easy Integration**: Built on VideoSDK's robust Python SDK.
-- 🏗️ **Extensible**: Add your own agents and tools easily.
+The easiest way to get started is using Docker! No need to install Python or manage dependencies.
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) installed on your system
+
+### Setup & Run
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/videosdk-community/ai-agent-examples.git
+   cd ai-agent-examples
+   ```
+
+2. **Set up your environment:**
+   ```sh
+   cp env.sample .env
+   # Edit .env with your API keys
+   ```
+
+3. **Run any agent with one command:**
+   ```sh
+   # List all available agents
+   ./run.sh list
+   
+   # Run a specific agent
+   ./run.sh celebrity
+   ./run.sh aws
+   ./run.sh openai
+   ./run.sh recruiter
+   ./run.sh mcp
+   ```
+
+### Alternative Docker Commands
+
+If you prefer using Docker directly:
+
+```sh
+# Build the image
+docker build -t ai-agent-examples .
+
+# Run any agent
+docker run --rm -it --env-file .env ai-agent-examples celebrity
+docker run --rm -it --env-file .env ai-agent-examples aws
+docker run --rm -it --env-file .env ai-agent-examples openai
+docker run --rm -it --env-file .env ai-agent-examples mcp
+
+# List available agents
+docker run --rm ai-agent-examples list
+```
+
+### Using Docker Compose
+
+```sh
+# Build and run with docker-compose
+docker-compose build
+docker-compose run --rm ai-agent celebrity
+docker-compose run --rm ai-agent aws
+docker-compose run --rm ai-agent mcp
+```
+
+### 🔧 Automatic Dependency Management
+
+Docker automatically installs dependencies from all `requirements.txt` files in the repository:
+- Main `requirements.txt` (core dependencies)
+- `mcp/requirements.txt` (MCP-specific packages)
+- `fuctionTools/requirements.txt` (function tools dependencies)
+- Any other `requirements.txt` files you add to subdirectories
+
+No need to manually merge requirements - just add your folder-specific dependencies!
 
 ---
 
-## 🌟 Quick Start Guide
+## 🌟 Manual Setup (Alternative)
+
+If you prefer to run without Docker:
 
 1. **Clone the repository:**
    ```sh
@@ -50,7 +115,7 @@ To get started, make sure you have:
    ```
 2. **Create your environment file and set up all API keys:**
    ```sh
-   cp .env.sample .env
+   cp env.sample .env
    ```
 3. **Set up a Python environment and install dependencies:**
    ```sh
@@ -68,25 +133,39 @@ To get started, make sure you have:
 6. **Run your chosen agent:**
    ```sh
    python "basicAgents/recruiter.py"
-   # Or try openai.py, gemini.py, aws.py, etc.
+   # Or try openai.py, gemini.py, aws.py, mcp/mcp.py, etc.
    ```
 7. **Join the same meeting from a VideoSDK client app** (Web, Mobile, etc.) to interact with your agent in real time.
 
 ---
 
+## Key Features of VideoSDK AI Agents
+
+- 🎤 **Real-time Voice & Media**: Agents can listen, speak, and interact live in meetings.
+- 🤖 **Multi-Model Support**: Integrate with OpenAI, Gemini, AWS NovaSonic, and more.
+- 🧩 **Pluggable Agent Types**: Includes recruiter, tutor, doctor, storyteller, and more.
+- 🛠️ **Function Tools**: Extend agent capabilities with event scheduling, expense tracking, and more (see `fuctionTools/`).
+- 🔌 **Easy Integration**: Built on VideoSDK's robust Python SDK.
+- 🏗️ **Extensible**: Add your own agents and tools easily.
+- 🐳 **Docker Ready**: Run any agent with just one command using Docker.
+- 🌐 **MCP Integration**: Connect agents to external data sources and tools using Model Context Protocol.
+
+---
+
 ## Example Agents
 
-| Agent Type | Description | File |
-|------------|-------------|------|
-| 🎙️ **Basic Voice Agent** | Simple voice assistant with different LLM options | [openai.py](openai.py), [gemini.py](gemini.py), [aws.py](aws.py) |
-| 👩‍💼 **Recruiter** | Conducts screening interviews, evaluates communication skills | [recruiter.py](basicAgents/recruiter.py) |
-| 👨‍🏫 **Tutor** | Helps students understand academic concepts | [tutor.py](basicAgents/tutor.py) |
-| 👨‍⚕️ **Doctor** | Provides general medical guidance (not medical advice) | [doctor.py](basicAgents/doctor.py) |
-| 📚 **Storyteller** | Creates stories from user keywords in real-time | [storyteller.py](basicAgents/storyteller.py) |
-| 👯 **Companion** | Friendly, empathetic AI for casual chat | [companion.py](basicAgents/companion.py) |
-| 🌟 **Celebrity** | Role-plays as famous personalities | [celebrity.py](basicAgents/celebrity.py) |
-| 🧘 **Confession** | Nonjudgmental listener for reflection | [confession.py](basicAgents/confession.py) |
-| 🛠️ **Agents with Function Tools** | Agents that can schedule events, track expenses, or take notes using [fuctionTools](fuctionTools/) | See [fuctionTools/README.md](fuctionTools/README.md) |
+| Agent Type | Description | File | Docker Command |
+|------------|-------------|------|----------------|
+| 🎙️ **Basic Voice Agent** | Simple voice assistant with different LLM options | [openai.py](openai.py), [gemini.py](gemini.py), [aws.py](aws.py) | `./run.sh openai` / `./run.sh gemini` / `./run.sh aws` |
+| 👩‍💼 **Recruiter** | Conducts screening interviews, evaluates communication skills | [recruiter.py](basicAgents/recruiter.py) | `./run.sh recruiter` |
+| 👨‍🏫 **Tutor** | Helps students understand academic concepts | [tutor.py](basicAgents/tutor.py) | `./run.sh tutor` |
+| 👨‍⚕️ **Doctor** | Provides general medical guidance (not medical advice) | [doctor.py](basicAgents/doctor.py) | `./run.sh doctor` |
+| 📚 **Storyteller** | Creates stories from user keywords in real-time | [storyteller.py](basicAgents/storyteller.py) | `./run.sh storyteller` |
+| 👯 **Companion** | Friendly, empathetic AI for casual chat | [companion.py](basicAgents/companion.py) | `./run.sh companion` |
+| 🌟 **Celebrity** | Role-plays as famous personalities | [celebrity.py](basicAgents/celebrity.py) | `./run.sh celebrity` |
+| 🧘 **Confession** | Nonjudgmental listener for reflection | [confession.py](basicAgents/confession.py) | `./run.sh confession` |
+| 🌐 **MCP Agent** | Connects to external data sources and tools using Model Context Protocol | [mcp.py](mcp/mcp.py) | `./run.sh mcp` |
+| 🛠️ **Agents with Function Tools** | Agents that can schedule events, track expenses, or take notes using [fuctionTools](fuctionTools/) | See [fuctionTools/README.md](fuctionTools/README.md) | Manual setup required |
 
 ---
 
@@ -95,6 +174,7 @@ To get started, make sure you have:
 - **basicAgents**: Ready-to-use AI agents for recruiter, tutor, doctor, storyteller, companion, celebrity, and more. Each agent is a Python script you can run directly.
 - **pythonSDK**: Core VideoSDK Python integration, including meeting and participant event handlers. Start here to understand the SDK basics and generate meeting IDs.
 - **fuctionTools**: Utility tools for agents, such as brain dump, event scheduler, and expense tracker. Integrate these with your agents for advanced workflows.
+- **mcp**: Model Context Protocol agents that connect to external data sources and tools. Includes example MCP servers and integration patterns.
 - **aws.py, openai.py, gemini.py**: Example scripts for running a basic agent with AWS, OpenAI, or Gemini models.
 
 ---
@@ -103,6 +183,7 @@ To get started, make sure you have:
 
 - **Production-Ready**: Built on a scalable, real-time platform trusted by thousands of developers.
 - **Flexible**: Mix and match LLMs, agent types, and tools for your unique use case.
+- **Docker-First**: Easy deployment and testing with containerized environments.
 
 ---
 
