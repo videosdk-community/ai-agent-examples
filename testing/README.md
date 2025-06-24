@@ -15,12 +15,13 @@ The AI Agent SDK is a Python framework built on top of the VideoSDK Python SDK t
 ## Features
 
 - **🎤 Real-time Voice & Media**: Agents can listen, speak, and interact live in meetings.
+- **📞 SIP & Telephony Integration**: Seamlessly connect agents to phone systems via SIP for call handling, routing, and PSTN access.
 - **🤖 Multi-Model Support**: Integrate with OpenAI, Gemini, AWS NovaSonic, and more.
 - **🧩 Cascading Pipeline**: Integrates with different providers of STT, LLM and TTS seamlessly.
 - **🧠 Conversational Flow**: Manages turn detection and VAD for smooth interactions.
 - **🛠️ Function Tools**: Extend agent capabilities with event scheduling, expense tracking, and more.
 - **🌐 MCP Integration**: Connect agents to external data sources and tools using Model Context Protocol.
-- **🔗 A2A Communication**: Enable agent-to-agent interactions for complex workflows.
+- **🔗 A2A Protocol**: Enable agent-to-agent interactions for complex workflows.
 
 ## Introduction
 
@@ -50,6 +51,20 @@ Before you begin, ensure you have:
 ## Installation
 
 - Create and activate a virtual environment with Python 3.12 or higher.
+<details>
+<summary><strong>💻 macOS / Linux</strong></summary>
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+</details> 
+<details> <summary><strong>🪟 Windows</strong></summary>
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+</details>
 - Install the core VideoSDK AI Agent package 
 ```bash
 pip install videosdk-agents
