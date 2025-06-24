@@ -43,36 +43,39 @@ Before you begin, ensure you have:
 - A VideoSDK authentication token (generate from [app.videosdk.live](https://app.videosdk.live))
 - - A VideoSDK meeting ID (you can generate one using the [Create Room API](https://docs.videosdk.live/api-reference/realtime-communication/create-room) or through the VideoSDK dashboard)
 - Python 3.12 or higher
-- API Key: An API key corresponding to your chosen model provider:
-  - OpenAI API key (for OpenAI models)
-  - Google Gemini API key (for Gemini's LiveAPI)
-  - AWS credentials (aws_access_key_id and aws_secret_access_key) for Amazon Nova Sonic
+- API Keys.
 
 ## Installation
 
 - Create and activate a virtual environment with Python 3.12 or higher.
-<details>
-<summary><strong>💻 macOS / Linux</strong></summary>
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-</details> 
-<details> <summary><strong>🪟 Windows</strong></summary>
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-</details>
+    <details>
+    <summary><strong>💻 macOS / Linux</strong></summary>
+    
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+    </details> 
+    <details> 
+    <summary><strong>🪟 Windows</strong></summary>
+    
+    ```bash
+    python -m venv venv
+    venv\Scripts\activate
+    ```
+    </details>
+    
 - Install the core VideoSDK AI Agent package 
-```bash
-pip install videosdk-agents
-```
-- Install the plugin for your chosen AI model. Each plugin is tailored for seamless integration with the VideoSDK AI Agent SDK. (Given below is for VideoSDK's Turn Detector)
-```bash
-pip install videosdk-plugins-turn-detector
-```
+  ```bash
+  pip install videosdk-agents
+  ```
+- Install Optional Plugins. Plugins help integrate different providers for Realtime, STT, LLM, TTS, and more. Install what your use case needs:
+  ```bash
+  # Example: Install the Turn Detector plugin
+  pip install videosdk-plugins-turn-detector
+  ```
+  👉 Supported plugins (Realtime, LLM, STT, TTS, VAD) are listed in the Supported Libraries section below.
+
 
 ## Documentation and Guides
 
