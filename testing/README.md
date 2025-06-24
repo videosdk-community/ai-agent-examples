@@ -1,6 +1,6 @@
 <!--BEGIN_BANNER_IMAGE-->
 <p align="center">
-  <img src="https://raw.githubusercontent.com/videosdk-live/agents/main/.github/banner.png" alt="VideoSDK AI Agents Banner" style="width:100%;">
+  <img src="https://raw.githubusercontent.com/videosdk-community/ai-agent-examples/main/.github/banner.png" alt="VideoSDK AI Agents Banner" style="width:100%;">
 </p>
 <!--END_BANNER_IMAGE-->
 
