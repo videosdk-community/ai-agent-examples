@@ -1,3 +1,9 @@
+<!--BEGIN_BANNER_IMAGE-->
+<p align="center">
+  <img src="https://raw.githubusercontent.com/videosdk-live/agents/main/.github/banner.png" alt="VideoSDK AI Agents Banner" style="width:100%;">
+</p>
+<!--END_BANNER_IMAGE-->
+
 # VideoSDK AI Agents
 The Easiest way to Build a Enterprise Grade AI Voice Agents.
 
@@ -23,6 +29,12 @@ The AI Agent SDK is a Python framework built on top of the VideoSDK Python SDK t
 - **🌐 MCP Integration**: Connect agents to external data sources and tools using Model Context Protocol.
 - **🔗 A2A Protocol**: Enable agent-to-agent interactions for complex workflows.
 
+> \[!IMPORTANT]
+>
+> **Star VideoSDK Repositories** ⭐️
+>
+> Get instant notifications for new releases and updates. Your support helps us grow and improve VideoSDK!
+
 ## Introduction
 
 ### ⚙️ System Components
@@ -43,7 +55,8 @@ Before you begin, ensure you have:
 - A VideoSDK authentication token (generate from [app.videosdk.live](https://app.videosdk.live))
 - - A VideoSDK meeting ID (you can generate one using the [Create Room API](https://docs.videosdk.live/api-reference/realtime-communication/create-room) or through the VideoSDK dashboard)
 - Python 3.12 or higher
-- API Keys.
+- Third-Party API Keys:
+- - API keys for the services you intend to use (e.g., OpenAI for LLM/STT/TTS, ElevenLabs for TTS, Google for Gemini etc.).
 
 ## Installation
 
@@ -74,12 +87,16 @@ Before you begin, ensure you have:
   # Example: Install the Turn Detector plugin
   pip install videosdk-plugins-turn-detector
   ```
-  👉 Supported plugins (Realtime, LLM, STT, TTS, VAD) are listed in the Supported Libraries section below.
+  👉 Supported plugins (Realtime, LLM, STT, TTS, VAD) are listed in the [Supported Libraries](#supported-libraries-and-plugins) section below.
 
 
-## Documentation and Guides
+## 🏁 Getting Started: Your First Agent
 
-To integrate VideoSDK Agents into your application, refer to the [VideoSDK AI Agents Documentation](https://docs.videosdk.live/ai_agents/introduction) for detailed instructions and examples.
+Now that you've installed the necessary packages, you're ready to build!
+
+- For detailed guides, tutorials, and API references, check out our official [VideoSDK AI Agents Documentation](https://docs.videosdk.live/ai_agents/introduction).
+- To see the framework in action, explore the code in the [Examples](examples/) directory. It is a great place to quickstart.
+
 
 ## Architecture
 
@@ -90,16 +107,15 @@ This architecture shows how AI voice agents connect to VideoSDK meetings. The sy
 
 The framework supports integration with various AI models and tools, including:
 
-| **Provider** | **Real-time** | **Speech-to-Text (STT)** | **Text-to-Speech (TTS)** | **Language Models (LLM)** | **Voice Activity Detection (VAD)** |
-|--------------|:-------------:|:-------------------------:|:-------------------------:|:--------------------------:|:----------------------------------:|
-| **OpenAI** | [OpenAI Realtime](https://docs.videosdk.live/ai_agents/plugins/realtime/openai) | [OpenAI STT](https://docs.videosdk.live/ai_agents/plugins/stt/openai) | [OpenAI TTS](https://docs.videosdk.live/ai_agents/plugins/tts/openai) | [OpenAI LLM](https://docs.videosdk.live/ai_agents/plugins/llm/openai) | ✖️ |
-| **Google** | [Gemini Realtime](https://docs.videosdk.live/ai_agents/plugins/realtime/google-live-api) | [Google STT](https://docs.videosdk.live/ai_agents/plugins/stt/google) | [Google TTS](https://docs.videosdk.live/ai_agents/plugins/tts/google) | [Google LLM](https://docs.videosdk.live/ai_agents/plugins/llm/google) | ✖️ |
-| **AWS** | [AWS Nova Sonic](https://docs.videosdk.live/ai_agents/plugins/realtime/aws-nova-sonic) | ✖️ | ✖️ | ✖️ | ✖️ |
-| **Sarvam** |✖️| [Sarvam STT](https://docs.videosdk.live/ai_agents/plugins/stt/sarvam-ai) | [Sarvam TTS](https://docs.videosdk.live/ai_agents/plugins/tts/sarvam-ai) | [Sarvam LLM](https://docs.videosdk.live/ai_agents/plugins/llm/sarvam-ai) | ✖️ |
-| **Deepgram** | ✖️ | [Deepgram STT](https://docs.videosdk.live/ai_agents/plugins/stt/deepgram) | ✖️ | ✖️ | ✖️ |
-| **ElevenLabs** | ✖️ | ✖️ | [ElevenLabs TTS](https://docs.videosdk.live/ai_agents/plugins/tts/elevenlabs) | ✖️ | ✖️ |
-| **Silero VAD** | ✖️ | ✖️ | ✖️ | ✖️ | [Silero VAD](https://docs.videosdk.live/ai_agents/plugins/vad/silero) |
-
+| **Provider** | **Real-time** | **Speech-to-Text (STT)** | **Language Models (LLM)** | **Text-to-Speech (TTS)** | **Voice Activity Detection (VAD)** |
+|--------------|:-------------:|:-------------------------:|:--------------------------:|:-------------------------:|:----------------------------------:|
+| **OpenAI** | [OpenAIRealtime](https://docs.videosdk.live/ai_agents/plugins/realtime/openai) | [OpenAISTT](https://docs.videosdk.live/ai_agents/plugins/stt/openai) | [OpenAILLM](https://docs.videosdk.live/ai_agents/plugins/llm/openai) | [OpenAITTS](https://docs.videosdk.live/ai_agents/plugins/tts/openai) | ✖️ |
+| **Google** | [GeminiRealtime](https://docs.videosdk.live/ai_agents/plugins/realtime/google-live-api) | [GoogleSTT](https://docs.videosdk.live/ai_agents/plugins/stt/google) | [GoogleLLM](https://docs.videosdk.live/ai_agents/plugins/llm/google) | [GoogleTTS](https://docs.videosdk.live/ai_agents/plugins/tts/google) | ✖️ |
+| **AWS** | [AWSNovaSonic](https://docs.videosdk.live/ai_agents/plugins/realtime/aws-nova-sonic) | ✖️ | ✖️ | ✖️ | ✖️ |
+| **Sarvam** | ✖️ | [SarvamSTT](https://docs.videosdk.live/ai_agents/plugins/stt/sarvam-ai) | [SarvamLLM](https://docs.videosdk.live/ai_agents/plugins/llm/sarvam-ai) | [SarvamTTS](https://docs.videosdk.live/ai_agents/plugins/tts/sarvam-ai) | ✖️ |
+| **Deepgram** | ✖️ | [DeepgramSTT](https://docs.videosdk.live/ai_agents/plugins/stt/deepgram) | ✖️ | ✖️ | ✖️ |
+| **ElevenLabs** | ✖️ | ✖️ | ✖️ | [ElevenLabsTTS](https://docs.videosdk.live/ai_agents/plugins/tts/elevenlabs) | ✖️ |
+| **Silero VAD** | ✖️ | ✖️ | ✖️ | ✖️ | [SileroVAD](https://docs.videosdk.live/ai_agents/plugins/vad/silero) |
 
 ## Examples
 
