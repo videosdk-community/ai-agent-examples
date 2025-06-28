@@ -107,7 +107,7 @@ This architecture shows how AI voice agents connect to VideoSDK meetings. The sy
 
 The framework supports integration with various AI models and tools, including:
 
-| **Provider** | **Real-time** | **Speech-to-Text (STT)** | **Language Models (LLM)** | **Text-to-Speech (TTS)** | **Voice Activity Detection (VAD)** |
+| **Provider** | **Real-time Models** | **Speech-to-Text (STT)** | **Language Models (LLM)** | **Text-to-Speech (TTS)** | **Voice Activity Detection (VAD)** |
 |--------------|:-------------:|:-------------------------:|:--------------------------:|:-------------------------:|:----------------------------------:|
 | **OpenAI** | [OpenAIRealtime](https://docs.videosdk.live/ai_agents/plugins/realtime/openai) | [OpenAISTT](https://docs.videosdk.live/ai_agents/plugins/stt/openai) | [OpenAILLM](https://docs.videosdk.live/ai_agents/plugins/llm/openai) | [OpenAITTS](https://docs.videosdk.live/ai_agents/plugins/tts/openai) | ✖️ |
 | **Google** | [GeminiRealtime](https://docs.videosdk.live/ai_agents/plugins/realtime/google-live-api) | [GoogleSTT](https://docs.videosdk.live/ai_agents/plugins/stt/google) | [GoogleLLM](https://docs.videosdk.live/ai_agents/plugins/llm/google) | [GoogleTTS](https://docs.videosdk.live/ai_agents/plugins/tts/google) | ✖️ |
