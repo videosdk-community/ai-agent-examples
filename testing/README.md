@@ -53,10 +53,10 @@ The AI Agent SDK is a Python framework built on top of the VideoSDK Python SDK t
 Before you begin, ensure you have:
 
 - A VideoSDK authentication token (generate from [app.videosdk.live](https://app.videosdk.live))
-- - A VideoSDK meeting ID (you can generate one using the [Create Room API](https://docs.videosdk.live/api-reference/realtime-communication/create-room) or through the VideoSDK dashboard)
+ - A VideoSDK meeting ID (you can generate one using the [Create Room API](https://docs.videosdk.live/api-reference/realtime-communication/create-room) or through the VideoSDK dashboard)
 - Python 3.12 or higher
 - Third-Party API Keys:
-- - API keys for the services you intend to use (e.g., OpenAI for LLM/STT/TTS, ElevenLabs for TTS, Google for Gemini etc.).
+ - API keys for the services you intend to use (e.g., OpenAI for LLM/STT/TTS, ElevenLabs for TTS, Google for Gemini etc.).
 
 ## Installation
 
