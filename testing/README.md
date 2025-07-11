@@ -315,42 +315,27 @@ Explore the following examples to see the framework in action:
 
 <table>
   <tr>
-    <th>🚀 Demo</th>
-    <th>📝 Description</th>
-  </tr>
-  <tr>
-    <td>
-      📞 <a href="https://github.com/videosdk-community/ai-telephony-demo" target="_blank">AI Telephony Agent</a>
+    <td width="50%" valign="top" style="padding: 10px;">
+      <h3>📞 <a href="https://github.com/videosdk-community/ai-telephony-demo" target="_blank">AI Telephony Agent</a></h3>
+      <p>Use case: Hospital appointment booking via a voice-enabled agent.</p>
     </td>
-    <td>
-      Hospital appointment booking via a voice-enabled telephony agent.
+    <td width="50%" valign="top" style="padding: 10px;">
+      <h3>✈️ <a href="https://github.com/videosdk-community/a2a-mcp-agent" target="_blank">A2A MCP Agent</a></h3>
+      <p>Use case: Ask about available flights & hotels and send email with booking info.</p>
     </td>
   </tr>
   <tr>
-    <td>
-      ✈️ <a href="https://github.com/videosdk-community/a2a-mcp-agent" target="_blank">A2A MCP Agent</a>
+    <td width="50%" valign="top" style="padding: 10px;">
+      <h3>👨‍🏫 <a href="https://github.com/videosdk-community/ai-avatar-demo" target="_blank">AI Avatar</a></h3>
+      <p>Use case: Answering queries about current weather conditions using an avatar.</p>
     </td>
-    <td>
-      Asks about available flights and hotels, then sends emails with the relevant information.
-    </td>
-  </tr>
-  <tr>
-    <td>
-      👨‍🏫 <a href="https://github.com/videosdk-community/ai-avatar-demo" target="_blank">AI Avatar</a>
-    </td>
-    <td>
-      Answers voice queries about current weather information using an avatar.
-    </td>
-  </tr>
-  <tr>
-    <td>
-      🛒 <a href="https://github.com/videosdk-community/ai-agent-demo/tree/conversational-flow" target="_blank">Conversational Flow Agent</a>
-    </td>
-    <td>
-      E-commerce voice agent that handles product arrival queries and demonstrates turn detection when interrupted.
+    <td width="50%" valign="top" style="padding: 10px;">
+      <h3>🛒 <a href="https://github.com/videosdk-community/ai-agent-demo/tree/conversational-flow" target="_blank">Conversational Flow Agent</a></h3>
+      <p>Use case: E-commerce scenario with turn detection when interrupting the voice agent.</p>
     </td>
   </tr>
 </table>
+
 
 
 
