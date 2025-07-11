@@ -142,23 +142,14 @@ Function tools allow your agent to perform actions beyond conversation. There ar
 
 Below is an example of both:
 
-```python title="main.py"
+```python
 import aiohttp
 
 # External Function Tools
 @function_tool
 def get_weather(latitude: str, longitude: str):
-    """Called when the user asks about the weather. This function will return the weather for
-    the given location. When given a location, please estimate the latitude and longitude of the
-    location and do not ask the user for them.
-
-    Args:
-        latitude: The latitude of the location
-        longitude: The longitude of the location
-    """
     print(f"Getting weather for {latitude}, {longitude}")
     url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m"
-
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
@@ -177,11 +168,6 @@ class VoiceAgent(Agent):
 # Internal Function Tools
     @function_tool
     async def get_horoscope(self, sign: str) -> dict:
-        """Get today's horoscope for a given zodiac sign.
-
-        Args:
-            sign: The zodiac sign (e.g., Aries, Taurus, Gemini, etc.)
-        """
         horoscopes = {
             "Aries": "Today is your lucky day!",
             "Taurus": "Focus on your goals today.",
@@ -200,7 +186,8 @@ class VoiceAgent(Agent):
 
 ### Step 3: Setting Up the Pipeline
 
-The pipeline connects your agent to an AI model. In this example, we're using Google's real-time model:
+The pipeline connects your agent to an AI model. Here, we are using Google's Gemini for a [Real-time Pipeline](https://docs.videosdk.live/ai_agents/core-components/realtime-pipeline). You could also use a [Cascading Pipeline](https://docs.videosdk.live/ai_agents/core-components/cascading-pipeline).
+
 
 ```python
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
@@ -285,8 +272,6 @@ Once you have completed the setup, you can run your AI Voice Agent project using
 python main.py
 ```
 ---
-
-
 
 - For detailed guides, tutorials, and API references, check out our official [VideoSDK AI Agents Documentation](https://docs.videosdk.live/ai_agents/introduction).
 - To see the framework in action, explore the code in the [Examples](examples/) directory. It is a great place to quickstart.
