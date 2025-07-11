@@ -190,7 +190,8 @@ class SIPAIAgent(Agent):
         await self.session.say(self.greeting_message)
 
     async def on_exit(self) -> None:
-        pass```
+        pass
+```
 
 ## Server Setup and Deployment
 
