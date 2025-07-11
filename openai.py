@@ -5,7 +5,7 @@ from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
 from openai.types.beta.realtime.session import  TurnDetection
 
 ##### Set your meeting ID ####
-MEETING_ID = "z8iz-tai1-sj65"  # Replace with your actual meeting ID
+MEETING_ID = "577t-awrs-bptv"  # Replace with your actual meeting ID
 
 class MyVoiceAgent(Agent):
     def __init__(self):

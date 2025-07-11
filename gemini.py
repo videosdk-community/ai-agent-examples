@@ -1,11 +1,12 @@
 import asyncio
 import aiohttp
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool, ConversationFlow, ChatRole
+from typing import AsyncIterator
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
 from videosdk.agents import RealTimePipeline
 
 ##### Set your meeting ID ####
-MEETING_ID = "your_generated_meeting_id"  # Replace with your actual meeting ID
+MEETING_ID = "577t-awrs-bptv"  # Replace with your actual meeting ID
 
 class MyVoiceAgent(Agent):
     def __init__(self):
@@ -21,6 +22,29 @@ You are a helpful voice assistant. Respond to user queries with clear and concis
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
+class MyConversationFlow(ConversationFlow):
+    def __init__(self, agent, stt=None, llm=None, tts=None):
+        super().__init__(agent, stt, llm, tts)
+
+    async def run(self, transcript: str) -> AsyncIterator[str]:
+        """Main conversation loop: handle a user turn."""
+        await self.on_turn_start(transcript)
+
+        processed_transcript = transcript.lower().strip()
+        self.agent.chat_context.add_message(role=ChatRole.USER, content=processed_transcript)
+        
+        async for response_chunk in self.process_with_llm():
+            yield response_chunk
+
+        await self.on_turn_end()
+
+    async def on_turn_start(self, transcript: str) -> None:
+        """Called at the start of a user turn."""
+        self.is_turn_active = True
+
+    async def on_turn_end(self) -> None:
+        """Called at the end of a user turn."""
+        self.is_turn_active = False
 
 async def main(context: dict):
     model = GeminiRealtime(
@@ -36,6 +60,7 @@ async def main(context: dict):
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
+        conversation_flow=MyConversationFlow(MyVoiceAgent()),
         context=context
     )
 
