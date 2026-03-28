@@ -1,10 +1,7 @@
-import asyncio
-import aiohttp
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline
 
 # # Import modules for OpenAI Realtime
 # from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
@@ -13,8 +10,8 @@ from videosdk.agents import RealTimePipeline
 # # Import modules for AWS NovaSonic Realtime
 # from videosdk.plugins.aws import NovaSonicRealtime, NovaSonicConfig
 
-##### Set your meeting ID ####
-MEETING_ID = "your_generated_meeting_id"  # Replace with your actual meeting ID
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 class MyVoiceAgent(Agent):
     def __init__(self):
@@ -24,25 +21,25 @@ class MyVoiceAgent(Agent):
     - Begin by asking the student what topic or problem they want help with.
     - Break down complex ideas into simple, easy-to-understand explanations.
     - Encourage the student to think through problems, and ask guiding questions instead of giving direct answers immediately.
-    - Adjust your explanations based on the student’s age and understanding level.
+    - Adjust your explanations based on the student's age and understanding level.
     - Be positive, supportive, and avoid sounding robotic — speak naturally and conversationally.
     - If a student seems stuck or frustrated, reassure them and offer a step-by-step explanation.
     - Conclude each topic with a quick summary and offer to review or continue practicing.
-    
+
     Stay engaging, helpful, and encouraging — your goal is to build both knowledge and confidence.
     """,
     )
 
     async def on_enter(self) -> None:
         await self.session.say("Hi! I'm your AI tutor—here to help you learn, practice, and master whatever you're studying today.")
-    
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -76,26 +73,21 @@ async def main(context: dict):
 #     )
 
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="Tutor Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-        "meetingId": MEETING_ID, 
-        "name": "VideoSDK's Tutor Agent", 
-    }
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

@@ -1,10 +1,7 @@
-import asyncio
-import aiohttp
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline
 
 # # Import modules for OpenAI Realtime
 # from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
@@ -13,8 +10,8 @@ from videosdk.agents import RealTimePipeline
 # # Import modules for AWS NovaSonic Realtime
 # from videosdk.plugins.aws import NovaSonicRealtime, NovaSonicConfig
 
-##### Set your meeting ID ####
-MEETING_ID = "your_generated_meeting_id"  # Replace with your actual meeting ID
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 class MyVoiceAgent(Agent):
     def __init__(self):
@@ -27,22 +24,22 @@ class MyVoiceAgent(Agent):
     - Use vivid language, emotional tone, and simple structure (beginning, middle, end) to make the story engaging.
     - Speak expressively and at a comfortable pace to enhance the storytelling experience.
     - Keep the tone appropriate to the keywords — whimsical for fun topics, mysterious for spooky ones, etc.
-    - After the story, invite the user to give more keywords for another tale if they’d like.
+    - After the story, invite the user to give more keywords for another tale if they'd like.
 
     Your goal is to entertain, surprise, and delight the listener through instant storytelling magic.
     """,
     )
 
     async def on_enter(self) -> None:
-        await self.session.say("Hello! Give me 3 to 5 words, and I’ll spin them into a story just for you.")
-    
+        await self.session.say("Hello! Give me 3 to 5 words, and I'll spin them into a story just for you.")
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -76,26 +73,21 @@ async def main(context: dict):
 #     )
 
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="Storyteller Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-        "meetingId": MEETING_ID, 
-        "name": "VideoSDK's Storyteller Agent", 
-    }
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

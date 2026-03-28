@@ -26,7 +26,7 @@ This folder contains ready-to-use AI agent scripts, each designed for a specific
 - **confession.py**: Listens like a therapist or confessor, offering a safe, nonjudgmental space.
 
 ## How to Use
-1. Set your `MEETING_ID` in the script or via environment variables.
+1. Set your room ID via the `RoomOptions` configuration or via environment variables.
 2. Run the agent script:
    ```sh
    python recruiter.py

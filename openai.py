@@ -1,11 +1,9 @@
-import asyncio
-import aiohttp
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
 from openai.types.beta.realtime.session import  TurnDetection
 
-##### Set your meeting ID ####
-MEETING_ID = "577t-awrs-bptv"  # Replace with your actual meeting ID
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 class MyVoiceAgent(Agent):
     def __init__(self):
@@ -17,12 +15,12 @@ You are a helpful voice assistant. Respond to user queries with clear and concis
 
     async def on_enter(self) -> None:
         await self.session.say("Hello, how can I help you today?")
-    
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = OpenAIRealtime(
     model="gpt-4o-realtime-preview",
     config=OpenAIRealtimeConfig(
@@ -38,26 +36,21 @@ async def main(context: dict):
     )
 )
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="OpenAI Realtime Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-        "meetingId": MEETING_ID, 
-        "name": "OpenAI Agent", 
-    }
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

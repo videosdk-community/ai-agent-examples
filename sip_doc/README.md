@@ -142,23 +142,23 @@ sip_manager = create_sip_manager(
 
 ### Step 2: Define Your Agent's Pipeline
 
-The pipeline defines which AI models your agent uses. Here, we are using Google's Gemini for a [Real-time Pipeline](https://docs.videosdk.live/ai_agents/core-components/realtime-pipeline). You could also use a [Cascading Pipeline](https://docs.videosdk.live/ai_agents/core-components/cascading-pipeline).
+The pipeline defines which AI models your agent uses. Here, we are using Google's Gemini for a [Pipeline (Realtime Mode)](https://docs.videosdk.live/ai_agents/core-components/pipeline). You could also use a [Pipeline (Cascade Mode)](https://docs.videosdk.live/ai_agents/core-components/pipeline).
 
 ```python
-from videosdk.agents import RealTimePipeline
+from videosdk.agents import Pipeline
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
 
 def create_agent_pipeline():
     """This creates the AI model pipeline for our agent."""
     model = GeminiRealtime(
         api_key=os.getenv("GOOGLE_API_KEY"),
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Choose your desired voice
             response_modalities=["AUDIO"], # We want the agent to speak back
         ),
     )
-    return RealTimePipeline(model=model)
+    return Pipeline(model=model)
 ```
 
 ### Step 3: Define Your Agent's Personality and Tools

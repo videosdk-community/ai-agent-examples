@@ -1,7 +1,7 @@
-videosdk-plugins-openai
-videosdk-plugins-google
-videosdk-plugins-aws
-videosdk-agents
+videosdk-plugins-openai>=1.0.0
+videosdk-plugins-google>=1.0.0
+videosdk-plugins-aws>=1.0.0
+videosdk-agents>=1.0.0
 pyjwt
 python-dotenv
 requests

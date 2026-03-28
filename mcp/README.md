@@ -141,7 +141,7 @@ class MyAgent(Agent):
    # Add your API keys to .env
    ```
 
-3. **Generate a meeting ID:**
+3. **Create a room:**
    ```bash
    cd pythonSDK
    python main.py
@@ -182,7 +182,7 @@ class MyAgent(Agent):
    - Verify server startup and tool registration
 
 3. **Validate Configuration**
-   - Ensure meeting ID is set correctly
+   - Ensure room ID is set correctly
    - Check API keys in `.env` file
 
 ## 📚 Resources

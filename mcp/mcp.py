@@ -1,8 +1,6 @@
-import asyncio
-import aiohttp
 from pathlib import Path
 import sys
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, MCPServerStdio, MCPServerHTTP
+from videosdk.agents import Agent, AgentSession, Pipeline, MCPServerStdio, MCPServerHTTP, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
@@ -14,16 +12,16 @@ from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
 # # Import modules for AWS NovaSonic Realtime
 # from videosdk.plugins.aws import NovaSonicRealtime, NovaSonicConfig
 
-##### Set your meeting ID ####
-MEETING_ID = "your_generated_meeting_id"  # Replace with your actual meeting ID
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 class MyVoiceAgent(Agent):
     def __init__(self):
         # Define paths to your MCP servers
         mcp_script = Path(__file__).parent / "stdio.py"
         super().__init__(
-            instructions="""You are a helpful assistant with access to real-time data. 
-            You can provide current time information. 
+            instructions="""You are a helpful assistant with access to real-time data.
+            You can provide current time information.
             Always be conversational and helpful in your responses.""",
             mcp_servers=[
                 # STDIO MCP Server (Local Python script for time)
@@ -42,14 +40,14 @@ class MyVoiceAgent(Agent):
 
     async def on_enter(self) -> None:
         await self.session.say("Hi there! How can I help you today?")
-    
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -83,27 +81,22 @@ async def main(context: dict):
 #     )
 
 
-    pipeline = RealTimePipeline(model=model)
-    
+    pipeline = Pipeline(llm=model)
+
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="MCP Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-        "meetingId": MEETING_ID, 
-        "name": "VideoSDK's MCP Agent", 
-    }
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

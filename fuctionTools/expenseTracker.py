@@ -7,21 +7,15 @@ GOOGLE_SHEET_ID = "your-google-sheet-id"  # Replace with your actual Google Shee
 
 # The name of the sheet within your Google Spreadsheet where expenses will be logged.
 DEFAULT_SHEET_NAME = "Sheet1"
-
-# The ID of the VideoSDK meeting where this agent will be used.
-MEETING_ID =  "your-meeting-id" 
 # --- End of Configuration ---
 
-import asyncio
-import aiohttp
 import os
 import json
 import dotenv
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline
 
 # # Import modules for OpenAI Realtime
 # from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
@@ -34,6 +28,9 @@ from videosdk.agents import RealTimePipeline
 from google.oauth2 import service_account
 from googleapiclient.discovery import build as google_build_service
 from googleapiclient.errors import HttpError as GoogleHttpError
+
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 # Path to the .env file
 dotenv_path = "../.env"
@@ -97,8 +94,8 @@ class FinanceAssistantAgent(Agent):
             await self.session.say(error_message)
             return {"status": "error", "message": error_message}
 
-        spreadsheet_id = self.session.context.get("google_sheet_id")
-        sheet_name = self.session.context.get("google_sheet_name", DEFAULT_SHEET_NAME)
+        spreadsheet_id = GOOGLE_SHEET_ID
+        sheet_name = DEFAULT_SHEET_NAME
 
         if not spreadsheet_id or spreadsheet_id == "YOUR_GOOGLE_SHEET_ID_HERE":
             error_message = "Google Sheet ID is not configured or is still the placeholder. Cannot log expense."
@@ -153,9 +150,9 @@ class FinanceAssistantAgent(Agent):
             return {"status": "error", "message": error_message}
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -188,31 +185,22 @@ async def main(context: dict):
 #         )
 #     )
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=FinanceAssistantAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        print("Agent started. Waiting for expense details...")
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down Agent...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="Expense Tracker Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-            "meetingId": MEETING_ID,
-            "name": "Expense Tracker",
-            "google_sheet_id": GOOGLE_SHEET_ID,
-            "google_sheet_name": DEFAULT_SHEET_NAME
-        }
-
     print("Starting Agent...")
-
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

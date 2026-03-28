@@ -20,13 +20,13 @@ To get started, make sure you have:
   - **OpenAI:** Add your OpenAI API key as `OPENAI_API_KEY` in `.env`
   - **Google:** Add your Google API key as `GOOGLE_API_KEY` in `.env` (required for Gemini and Google function tools)
   - **AWS:** Add your AWS credentials as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_DEFAULT_REGION` in `.env` (for AWS NovaSonic agents)
-- **A VideoSDK meeting ID**
+- **A VideoSDK room ID**
   - **Simply run the provided script:**
     ```sh
     cd PythonSDK
     python main.py
     ```
-    This will print a new meeting ID in your terminal, ready to use with any agent!
+    This will print a new room ID in your terminal, ready to use with any agent!
 
 ---
 
@@ -123,13 +123,13 @@ If you prefer to run without Docker:
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    pip install -r requirements.txt
    ```
-4. **Generate a meeting ID:**
+4. **Create a room:**
    ```sh
    cd PythonSDK
    python main.py
-   # Copy the printed meeting ID
+   # Copy the printed room ID
    ```
-5. **Update the meeting ID in any agent script** (e.g., `basicAgents/recruiter.py`)
+5. **Update the room ID in any agent script** (e.g., `basicAgents/recruiter.py`)
 6. **Run your chosen agent:**
    ```sh
    python "basicAgents/recruiter.py"
@@ -172,7 +172,7 @@ If you prefer to run without Docker:
 ## Folder Structure & Use Cases
 
 - **basicAgents**: Ready-to-use AI agents for recruiter, tutor, doctor, storyteller, companion, celebrity, and more. Each agent is a Python script you can run directly.
-- **pythonSDK**: Core VideoSDK Python integration, including meeting and participant event handlers. Start here to understand the SDK basics and generate meeting IDs.
+- **pythonSDK**: Core VideoSDK Python integration, including meeting and participant event handlers. Start here to understand the SDK basics and generate room IDs.
 - **fuctionTools**: Utility tools for agents, such as brain dump, event scheduler, and expense tracker. Integrate these with your agents for advanced workflows.
 - **mcp**: Model Context Protocol agents that connect to external data sources and tools. Includes example MCP servers and integration patterns.
 - **aws.py, openai.py, gemini.py**: Example scripts for running a basic agent with AWS, OpenAI, or Gemini models.
@@ -194,6 +194,18 @@ If you prefer to run without Docker:
 - [Community Discord](https://discord.gg/Gpmj6eCq5u)
 
 ---
+
+## VideoSDK Agents
+
+Build and deploy production-ready AI voice & video agents with [VideoSDK](https://videosdk.live). This repo is your central hub for agent templates, feature examples, and everything you need to ship real-world AI-powered applications.
+
+| Resource | Description |
+|---|---|
+| 🚀 [Use Case Examples](https://github.com/videosdk-live/agents/tree/main/use_case_examples) | Production-ready templates across Customer Support, Healthcare, Tech Support & more |
+| ⚡ [Feature Examples](https://github.com/videosdk-live/agents/tree/main/examples) | Always up-to-date examples showcasing the latest VideoSDK Agent features |
+| 📖 [AI Agents Docs](https://docs.videosdk.live/ai_agents/introduction) | Full guides, concepts & API references to get you started |
+
+> ⭐ If this helps you, star this repo and [`videosdk-live/agents`](https://github.com/videosdk-live/agents) — it keeps us motivated to ship more!
 
 ## Contributing
 Pull requests and new agent ideas are welcome!
