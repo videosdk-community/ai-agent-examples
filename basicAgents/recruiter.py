@@ -1,10 +1,7 @@
-import asyncio
-import aiohttp
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline
 
 # # Import modules for OpenAI Realtime
 # from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
@@ -13,20 +10,20 @@ from videosdk.agents import RealTimePipeline
 # # Import modules for AWS NovaSonic Realtime
 # from videosdk.plugins.aws import NovaSonicRealtime, NovaSonicConfig
 
-##### Set your meeting ID ####
-MEETING_ID = "your_generated_meeting_id"  # Replace with your actual meeting ID
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 class MyVoiceAgent(Agent):
     def __init__(self):
         super().__init__(
             instructions="""
-    You are an AI recruiter participating in a live conversation with job candidates. Your role is to conduct initial screening interviews, assess communication skills, and gather relevant information about the candidate’s experience, skills, and career goals.
+    You are an AI recruiter participating in a live conversation with job candidates. Your role is to conduct initial screening interviews, assess communication skills, and gather relevant information about the candidate's experience, skills, and career goals.
     - Start with a friendly greeting and introduce yourself as part of the recruitment team.
-    - Ask open-ended questions about the candidate’s background, recent roles, key skills, and what they’re looking for.
+    - Ask open-ended questions about the candidate's background, recent roles, key skills, and what they're looking for.
     - Evaluate soft skills, communication clarity, and cultural fit through conversation.
     - Be professional, encouraging, and neutral — do not express personal opinions or make promises about hiring.
     - If needed, explain the role, company, and next steps in the hiring process.
-    - Politely wrap up the conversation with a summary of what you’ve learned and thank the candidate.
+    - Politely wrap up the conversation with a summary of what you've learned and thank the candidate.
 
     You are not responsible for making hiring decisions — your job is to gather clear, structured candidate information and leave them with a positive experience.
     """,
@@ -34,14 +31,14 @@ class MyVoiceAgent(Agent):
 
     async def on_enter(self) -> None:
         await self.session.say("Hi! I'm your AI recruiter—ready to learn more about you. Can you start by telling me a bit about your background.")
-    
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -75,26 +72,21 @@ async def main(context: dict):
 #     )
 
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="Recruiter Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-        "meetingId": MEETING_ID, 
-        "name": "VideoSDK's Recruiter Agent", 
-    }
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

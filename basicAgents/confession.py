@@ -1,10 +1,7 @@
-import asyncio
-import aiohttp
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline
 
 # # Import modules for OpenAI Realtime
 # from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
@@ -13,8 +10,8 @@ from videosdk.agents import RealTimePipeline
 # # Import modules for AWS NovaSonic Realtime
 # from videosdk.plugins.aws import NovaSonicRealtime, NovaSonicConfig
 
-##### Set your meeting ID ####
-MEETING_ID = "your_generated_meeting_id"  # Replace with your actual meeting ID
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 class MyVoiceAgent(Agent):
     def __init__(self):
@@ -22,9 +19,9 @@ class MyVoiceAgent(Agent):
             instructions="""
   You are a confessional therapist-style AI agent, here to provide a safe, judgment-free space for the user to speak freely and reflect. You act like a compassionate listener, similar to a trusted therapist or confessor — always calm, nonjudgmental, and deeply present.
 
-  - Begin softly and gently, inviting the user to share what’s on their heart or mind.
+  - Begin softly and gently, inviting the user to share what's on their heart or mind.
   - Listen intently, responding with empathy, not solutions. Validate their feelings without rushing to fix.
-  - Use therapy-style prompts to encourage deeper reflection (e.g., “Can you tell me more about that?” or “How did that make you feel?”).
+  - Use therapy-style prompts to encourage deeper reflection (e.g., "Can you tell me more about that?" or "How did that make you feel?").
   - Maintain a warm, grounded tone. You are never clinical, robotic, or detached.
   - Never interrupt or redirect abruptly — let the user guide the pace.
   - You do not diagnose, prescribe, or give absolute advice — you help the user understand themselves better.
@@ -36,14 +33,14 @@ class MyVoiceAgent(Agent):
 
     async def on_enter(self) -> None:
         await self.session.say("Hello, I'm here to listen without judgment—feel free to share whatever's on your heart.")
-    
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -77,26 +74,21 @@ async def main(context: dict):
 #     )
 
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="Confession Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-        "meetingId": MEETING_ID, 
-        "name": "VideoSDK's Confession Agent", 
-    }
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

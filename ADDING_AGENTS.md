@@ -17,11 +17,10 @@ The system automatically scans these locations for agents:
 Simply create a new Python file following the existing pattern:
 
 ```python
-import asyncio
-from videosdk.agents import Agent, AgentSession, RealTimePipeline
-
-# Set your meeting ID
-MEETING_ID = "your_generated_meeting_id"
+from videosdk.agents import Agent, AgentSession, Pipeline, JobContext, RoomOptions, WorkerJob
+from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 class MyNewAgent(Agent):
     def __init__(self):
@@ -33,43 +32,38 @@ class MyNewAgent(Agent):
 
     async def on_enter(self) -> None:
         await self.session.say("Hello from your new agent!")
-    
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     # Choose your model (OpenAI, Gemini, AWS, etc.)
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda",
             response_modalities=["AUDIO"]
         )
     )
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyNewAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="My New Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-            "meetingId": MEETING_ID, 
-            "name": "My New Agent", 
-        }
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()
 ```
 
 ### 🎯 File Naming Convention

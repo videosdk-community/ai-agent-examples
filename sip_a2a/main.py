@@ -13,7 +13,7 @@ from twilio.twiml.voice_response import VoiceResponse, Dial
 import httpx
 
 # VideoSDK imports
-from videosdk.agents import JobContext, RoomOptions, WorkerJob, AgentSession, CascadingPipeline, Agent
+from videosdk.agents import JobContext, RoomOptions, WorkerJob, AgentSession, Pipeline, Agent
 
 # Local imports
 from agents.customer_agent import SIPCustomerServiceAgent
@@ -35,35 +35,35 @@ logger = logging.getLogger(__name__)
 logging.getLogger("videosdk").setLevel(LOG_LEVEL)
 logging.getLogger("agents").setLevel(LOG_LEVEL)
 
-logger.info(f"🔧 Logging configured at level: {LOG_LEVEL}")
+logger.info(f"Logging configured at level: {LOG_LEVEL}")
 
 # Check required environment variables
 def check_environment():
     """Check if all required environment variables are set."""
     required_vars = {
         "VIDEOSDK_AUTH_TOKEN": "VideoSDK authentication token",
-        "VIDEOSDK_SIP_USERNAME": "VideoSDK SIP username", 
+        "VIDEOSDK_SIP_USERNAME": "VideoSDK SIP username",
         "VIDEOSDK_SIP_PASSWORD": "VideoSDK SIP password",
-        "GOOGLE_API_KEY": "Google API key for Gemini realtime model", 
+        "GOOGLE_API_KEY": "Google API key for Gemini realtime model",
         "OPENAI_API_KEY": "OpenAI API key for text processing",
         "TWILIO_ACCOUNT_SID": "Twilio account SID",
         "TWILIO_AUTH_TOKEN": "Twilio auth token",
         "TWILIO_PHONE_NUMBER": "Twilio phone number"
     }
-    
+
     missing_vars = []
     for var, description in required_vars.items():
         if not os.getenv(var):
-            missing_vars.append(f"  ❌ {var}: {description}")
-    
+            missing_vars.append(f"  {var}: {description}")
+
     if missing_vars:
-        logger.error("❌ Missing required environment variables:")
+        logger.error("Missing required environment variables:")
         for var in missing_vars:
             logger.error(var)
         logger.error("Please set these in your .env file before running.")
         return False
     else:
-        logger.info("✅ All required environment variables are set")
+        logger.info("All required environment variables are set")
         return True
 
 # Check environment at startup
@@ -80,7 +80,6 @@ def on_pubsub_message(message):
     """Handle pubsub messages."""
     logger.info(f"Pubsub message received: {message}")
 
-# Removed DefaultConversationFlow - using SIPConversationFlow from session_manager instead
 
 async def _agent_entrypoint(ctx: JobContext):
     """
@@ -91,98 +90,98 @@ async def _agent_entrypoint(ctx: JobContext):
     """
     room_id = ctx.room_options.room_id
     call_id = getattr(ctx, 'call_id', 'N/A')
-    logger.info(f"[{room_id}] 📞 Starting agent entrypoint for call {call_id}")
+    logger.info(f"[{room_id}] Starting agent entrypoint for call {call_id}")
 
     specialist_session: Optional[AgentSession] = None
     customer_session: Optional[AgentSession] = None
     specialist_task: Optional[asyncio.Task] = None
-    
+
     # Create an event to track when the participant leaves
     participant_left_event = asyncio.Event()
 
     # Handler for participant left events
     def on_participant_left(participant_id):
-        logger.info(f"[{room_id}] 👤 Participant {participant_id} left. Setting event to end call.")
+        logger.info(f"[{room_id}] Participant {participant_id} left. Setting event to end call.")
         participant_left_event.set()
 
     try:
         # 1. Create Specialist Agent
-        logger.info(f"[{room_id}] 🏦 Creating Loan Specialist Agent...")
+        logger.info(f"[{room_id}] Creating Loan Specialist Agent...")
         specialist_agent = SIPLoanSpecialistAgent()
         specialist_pipeline = create_specialist_pipeline()
         specialist_session = create_session(specialist_agent, specialist_pipeline)
-        logger.info(f"[{room_id}] ✅ Specialist agent created.")
+        logger.info(f"[{room_id}] Specialist agent created.")
 
         # 2. Create Customer Agent
-        logger.info(f"[{room_id}] 👤 Creating Customer Service Agent...")
+        logger.info(f"[{room_id}] Creating Customer Service Agent...")
         customer_agent = SIPCustomerServiceAgent(ctx=ctx)
         customer_pipeline = create_customer_pipeline()
         customer_session = create_session(customer_agent, customer_pipeline)
-        logger.info(f"[{room_id}] ✅ Customer agent created.")
+        logger.info(f"[{room_id}] Customer agent created.")
 
         # 3. Start Specialist Agent in the background
-        logger.info(f"[{room_id}] 🚀 Starting specialist agent session in background...")
+        logger.info(f"[{room_id}] Starting specialist agent session in background...")
         specialist_task = asyncio.create_task(specialist_session.start())
         # Give a moment for it to start and register for A2A
         await asyncio.sleep(1)
-        logger.info(f"[{room_id}] ✅ Specialist agent session started.")
+        logger.info(f"[{room_id}] Specialist agent session started.")
 
         # 4. Connect to the room and start the Customer Agent
-        logger.info(f"[{room_id}] 🔗 Connecting to VideoSDK room...")
+        logger.info(f"[{room_id}] Connecting to VideoSDK room...")
         await ctx.connect()
-        
+
         # Register for participant_left events
         if hasattr(ctx.room, 'meeting') and hasattr(ctx.room.meeting, 'on'):
             ctx.room.meeting.on('participant-left', on_participant_left)
-            logger.info(f"[{room_id}] 📡 Registered for participant-left events")
-        
-        logger.info(f"[{room_id}] 🚀 Starting customer agent session...")
+            logger.info(f"[{room_id}] Registered for participant-left events")
+
+        logger.info(f"[{room_id}] Starting customer agent session...")
         await customer_session.start()
-        logger.info(f"[{room_id}] ✅ Customer agent session started.")
+        logger.info(f"[{room_id}] Customer agent session started.")
 
         # 5. Wait for the call to proceed
-        logger.info(f"[{room_id}] 🎧 Agents are running. Waiting for participant...")
+        logger.info(f"[{room_id}] Agents are running. Waiting for participant...")
         participant_id = await ctx.room.wait_for_participant()
-        logger.info(f"[{room_id}] 👤 Participant {participant_id} joined.")
-        
+        logger.info(f"[{room_id}] Participant {participant_id} joined.")
+
         await customer_agent.greet_user()
-        logger.info(f"[{room_id}] 👋 User greeted.")
-        
+        logger.info(f"[{room_id}] User greeted.")
+
         # Keep the process alive until the call ends (participant leaves or timeout)
-        logger.info(f"[{room_id}] ⏱️ Waiting for call to end...")
+        logger.info(f"[{room_id}] Waiting for call to end...")
         try:
             # Add a long timeout as safety net (4 hours max call)
             await asyncio.wait_for(participant_left_event.wait(), timeout=14400)
-            logger.info(f"[{room_id}] 📞 Call ended naturally.")
+            logger.info(f"[{room_id}] Call ended naturally.")
         except asyncio.TimeoutError:
-            logger.info(f"[{room_id}] ⏰ Maximum call time reached, ending call.")
+            logger.info(f"[{room_id}] Maximum call time reached, ending call.")
 
     except (asyncio.CancelledError, KeyboardInterrupt):
-        logger.info(f"[{room_id}] 🛑 Entrypoint cancelled.")
+        logger.info(f"[{room_id}] Entrypoint cancelled.")
     except Exception as e:
-        logger.error(f"[{room_id}] 💥 EXCEPTION in agent job: {e}", exc_info=True)
+        logger.error(f"[{room_id}] EXCEPTION in agent job: {e}", exc_info=True)
     finally:
-        logger.info(f"[{room_id}] 🧼 Cleaning up resources for call {call_id}...")
-        
+        logger.info(f"[{room_id}] Cleaning up resources for call {call_id}...")
+
         # Gracefully shut down the specialist task
         if specialist_task and not specialist_task.done():
             specialist_task.cancel()
             with suppress(asyncio.CancelledError):
                 await specialist_task
-                logger.info(f"[{room_id}] ✅ Specialist task cancelled.")
+                logger.info(f"[{room_id}] Specialist task cancelled.")
 
         # Close sessions
         if specialist_session:
             await specialist_session.close()
-            logger.info(f"[{room_id}] ✅ Specialist session closed.")
+            logger.info(f"[{room_id}] Specialist session closed.")
         if customer_session:
             await customer_session.close()
-            logger.info(f"[{room_id}] ✅ Customer session closed.")
+            logger.info(f"[{room_id}] Customer session closed.")
 
         # Shutdown the connection context
         await ctx.shutdown()
-        logger.info(f"[{room_id}] ✅ Context shut down.")
-        
+        logger.info(f"[{room_id}] Context shut down.")
+
         # Properly clean up room (fix for warning about un-awaited coroutine)
         if hasattr(ctx, 'room') and ctx.room:
             try:
@@ -192,14 +191,14 @@ async def _agent_entrypoint(ctx: JobContext):
                 # Then properly await the cleanup coroutine
                 if hasattr(ctx.room, 'cleanup'):
                     await ctx.room.cleanup()
-                logger.info(f"[{room_id}] ✅ Room cleanup complete.")
+                logger.info(f"[{room_id}] Room cleanup complete.")
             except Exception as e:
-                logger.error(f"[{room_id}] ❌ Error during room cleanup: {e}")
-        
+                logger.error(f"[{room_id}] Error during room cleanup: {e}")
+
         # Clean up from active sessions registry
         if call_id in active_sessions:
             active_sessions.pop(call_id, None)
-            logger.info(f"[{room_id}] ✅ Removed from active sessions.")
+            logger.info(f"[{room_id}] Removed from active sessions.")
 
 def _make_context(room_id: str, room_name: str, call_id: Optional[str] = None, caller_number: Optional[str] = None) -> JobContext:
     """Create context for agent job (following SIP plugin pattern)."""
@@ -217,12 +216,12 @@ def launch_agent_job(
     caller_number: Optional[str] = None,
 ) -> WorkerJob:
     """Creates and starts a WorkerJob for a single call, running both agents."""
-    logger.info(f"🏭 Launching agent job for room {room_id}, call {call_id}")
-    
+    logger.info(f"Launching agent job for room {room_id}, call {call_id}")
+
     if agent_config is None:
         agent_config = {}
-    
-    logger.info(f"🏗️  Creating context factory partial for room {room_id}")
+
+    logger.info(f"Creating context factory partial for room {room_id}")
     context_factory_partial = functools.partial(
         _make_context,
         room_id=room_id,
@@ -230,19 +229,19 @@ def launch_agent_job(
         call_id=call_id,
         caller_number=caller_number
     )
-    
-    logger.info(f"⚡ Creating WorkerJob with entrypoint: _agent_entrypoint")
+
+    logger.info(f"Creating WorkerJob with entrypoint: _agent_entrypoint")
     job = WorkerJob(entrypoint=_agent_entrypoint, jobctx=context_factory_partial)
-    
-    logger.info(f"🚀 Starting WorkerJob...")
+
+    logger.info(f"Starting WorkerJob...")
     job.start()
-    
-    logger.info(f"✅ WorkerJob started successfully for room {room_id}")
+
+    logger.info(f"WorkerJob started successfully for room {room_id}")
     return job
 
 class VideoSDKMeeting:
     """Service for managing VideoSDK rooms."""
-    
+
     def __init__(self, auth_token: str):
         self.auth_token = auth_token
         self.base_url = "https://api.videosdk.live/v2"
@@ -252,11 +251,11 @@ class VideoSDKMeeting:
         url = f"{self.base_url}/rooms"
         headers = {"Authorization": self.auth_token}
         payload = {}
-        
+
         region = os.getenv("VIDEOSDK_REGION")
         if region:
             payload["geoFence"] = region
-            
+
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.post(url, headers=headers, json=payload)
@@ -283,7 +282,7 @@ class VideoSDKMeeting:
 
 class TwilioManager:
     """Direct Twilio integration without the plugin."""
-    
+
     def __init__(self):
         self.client = Client(
             os.getenv("TWILIO_ACCOUNT_SID"),
@@ -304,18 +303,18 @@ class TwilioManager:
             logger.info(f"Creating VideoSDK room for call to {to_number}")
             room_id = await self.videosdk.create_room()
             logger.info(f"VideoSDK room created: {room_id}")
-            
+
             webhook_url = f"{self.base_url}/sip/answer/{room_id}"
             logger.info(f"Making Twilio call to {to_number} with webhook {webhook_url}")
-            
+
             call = self.client.calls.create(
                 to=to_number,
                 from_=self.from_number,
                 url=webhook_url
             )
-            
+
             logger.info(f"Twilio call created - SID: {call.sid}, Status: {call.status}")
-            
+
             return {
                 "sid": call.sid,
                 "status": call.status,
@@ -330,17 +329,17 @@ class TwilioManager:
         try:
             sip_endpoint = self.videosdk.get_sip_endpoint(room_id)
             sip_creds = self.videosdk.get_sip_credentials()
-            
+
             response = VoiceResponse()
             response.say("Please wait while we connect you to our customer service.", voice='alice')
             dial = Dial(answer_on_bridge=True)
             dial.sip(sip_endpoint, username=sip_creds["username"], password=sip_creds["password"])
             response.append(dial)
-            
+
             xml_response = str(response)
             logger.info(f"Responding with TwiML: {xml_response}")
             return xml_response, 200, {"Content-Type": "application/xml"}
-            
+
         except Exception as e:
             logger.error(f"Error handling incoming call: {e}", exc_info=True)
             return "An error occurred", 500, {"Content-Type": "text/plain"}
@@ -351,18 +350,18 @@ class TwilioManager:
             logger.info(f"Generating SIP response for room: {room_id}")
             sip_endpoint = self.videosdk.get_sip_endpoint(room_id)
             sip_creds = self.videosdk.get_sip_credentials()
-            
+
             logger.info(f"SIP endpoint: {sip_endpoint}")
             logger.info(f"SIP credentials: username={sip_creds['username']}")
-            
+
             response = VoiceResponse()
             dial = Dial(answer_on_bridge=True)
             dial.sip(sip_endpoint, username=sip_creds["username"], password=sip_creds["password"])
             response.append(dial)
-            
+
             twiml_response = str(response)
             logger.info(f"Generated TwiML response: {twiml_response}")
-            
+
             return twiml_response, 200, {"Content-Type": "application/xml"}
         except ValueError as e:
             if "VIDEOSDK_SIP" in str(e):
@@ -387,8 +386,8 @@ def create_specialist_pipeline():
 
 def start_customer_agent_for_call(call_id: str, room_id: str, caller_number: str = None) -> Dict[str, Any]:
     """Start a customer agent for a specific call using the SIP plugin pattern."""
-    logger.info(f"🎯 Starting customer agent for call {call_id} in room {room_id}")
-    
+    logger.info(f"Starting customer agent for call {call_id} in room {room_id}")
+
     try:
         # Configure agent for the call
         agent_config = {
@@ -397,17 +396,17 @@ def start_customer_agent_for_call(call_id: str, room_id: str, caller_number: str
             "caller_number": caller_number,
             "call_id": call_id
         }
-        logger.info(f"⚙️  Agent config: {agent_config}")
+        logger.info(f"Agent config: {agent_config}")
 
         # Launch agent job using the working SIP plugin pattern
-        logger.info(f"🚀 Launching agent job with launch_agent_job...")
+        logger.info(f"Launching agent job with launch_agent_job...")
         customer_job = launch_agent_job(
             room_id=room_id,
             agent_config=agent_config,
             call_id=call_id,
             caller_number=caller_number
         )
-        logger.info(f"✅ Agent job launched successfully for room {room_id}")
+        logger.info(f"Agent job launched successfully for room {room_id}")
 
         # Store session information
         active_sessions[call_id] = {
@@ -416,7 +415,7 @@ def start_customer_agent_for_call(call_id: str, room_id: str, caller_number: str
             "job": customer_job,
             "status": "active"
         }
-        logger.info(f"💾 Stored session info for call {call_id}")
+        logger.info(f"Stored session info for call {call_id}")
 
         return {
             "status": "success",
@@ -426,7 +425,7 @@ def start_customer_agent_for_call(call_id: str, room_id: str, caller_number: str
         }
 
     except Exception as e:
-        logger.error(f"❌ Failed to start customer agent for call {call_id}: {e}", exc_info=True)
+        logger.error(f"Failed to start customer agent for call {call_id}: {e}", exc_info=True)
         return {
             "status": "error",
             "call_id": call_id,
@@ -437,7 +436,7 @@ def start_customer_agent_for_call(call_id: str, room_id: str, caller_number: str
 async def lifespan(app: FastAPI):
     """Lifespan manager for FastAPI app startup and shutdown."""
     port = int(os.getenv("PORT", 8000))
-    
+
     try:
         # Setup ngrok tunnel (following sip_agent_example.py pattern)
         ngrok.kill()
@@ -452,9 +451,9 @@ async def lifespan(app: FastAPI):
         # Continue without failing - outgoing calls will still work
 
     try:
-        logger.info("✅ Services started successfully")
+        logger.info("Services started successfully")
     except Exception as e:
-        logger.error(f"❌ Failed to start services: {e}", exc_info=True)
+        logger.error(f"Failed to start services: {e}", exc_info=True)
         raise  # Re-raise to prevent app from starting with broken services
 
     yield
@@ -467,9 +466,9 @@ async def lifespan(app: FastAPI):
         logger.error(f"Error closing ngrok tunnel: {e}")
 
     try:
-        logger.info("✅ Cleanup complete")
+        logger.info("Cleanup complete")
     except Exception as e:
-        logger.error(f"❌ Error during cleanup: {e}")
+        logger.error(f"Error during cleanup: {e}")
 
 # Create FastAPI app
 app = FastAPI(title="SIP A2A Example", lifespan=lifespan)
@@ -480,33 +479,33 @@ async def make_call(to_number: str):
     if not twilio_manager.base_url:
         return {"status": "error", "message": "Service not ready (no base URL)."}
 
-    logger.info(f"📞 Making outgoing call to {to_number}")
+    logger.info(f"Making outgoing call to {to_number}")
 
     try:
         # Make the call using direct Twilio integration
         call_details = await twilio_manager.make_call(to_number)
-        
+
         call_id = call_details.get("sid")
         room_id = call_details.get("room_id") # Get the REAL room_id
 
         if call_id and room_id and call_details.get("status") != "failed":
             # Start our A2A-enabled customer agent in the correct room
-            logger.info(f"📞 Call created successfully, starting customer agent in room {room_id}...")
+            logger.info(f"Call created successfully, starting customer agent in room {room_id}...")
             result = start_customer_agent_for_call(call_id, room_id, None)
             call_details.update(result)
         else:
-            logger.error(f"❌ Call creation failed: {call_details}")
+            logger.error(f"Call creation failed: {call_details}")
 
         return {"status": "success", "details": call_details}
 
     except Exception as e:
-        logger.error(f"❌ Error making call: {e}", exc_info=True)
+        logger.error(f"Error making call: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
 @app.post("/sip/answer/{room_id}")
 async def answer_webhook(room_id: str):
     """Handle SIP answer webhook."""
-    logger.info(f"📞 Answering call for room: {room_id}")
+    logger.info(f"Answering call for room: {room_id}")
     body, status_code, headers = twilio_manager.get_sip_response_for_room(room_id)
     return Response(content=body, status_code=status_code, media_type=headers.get("Content-Type"))
 
@@ -527,41 +526,41 @@ async def incoming_webhook(request: Request):
         else:
             webhook_data = await request.json()
 
-        logger.info(f"📞 Received incoming webhook: {webhook_data}")
+        logger.info(f"Received incoming webhook: {webhook_data}")
 
         # Extract call information
         caller_number = webhook_data.get("From", "Unknown")
         call_id = webhook_data.get("CallSid")
 
         if not call_id:
-            logger.error("❌ No CallSid found in webhook data")
+            logger.error("No CallSid found in webhook data")
             return Response(content="Error: Missing CallSid", status_code=400)
 
-        logger.info(f"📞 Incoming call from {caller_number} with CallSid: {call_id}")
+        logger.info(f"Incoming call from {caller_number} with CallSid: {call_id}")
 
         # Create a REAL room for this call
-        logger.info(f"🏗️  Creating VideoSDK room for incoming call...")
+        logger.info(f"Creating VideoSDK room for incoming call...")
         room_id = await twilio_manager.videosdk.create_room()
-        logger.info(f"✅ VideoSDK room created: {room_id}")
-        
+        logger.info(f"VideoSDK room created: {room_id}")
+
         # Start our A2A-enabled customer agent for this call in the correct room
-        logger.info(f"🚀 Starting customer agent for incoming call in room {room_id}...")
+        logger.info(f"Starting customer agent for incoming call in room {room_id}...")
         result = start_customer_agent_for_call(call_id, room_id, caller_number)
-        
+
         if result.get("status") == "error":
-            logger.error(f"❌ Failed to start agent for incoming call: {result.get('error')}")
+            logger.error(f"Failed to start agent for incoming call: {result.get('error')}")
             # Still proceed with basic TwiML response to avoid dropping the call
         else:
-            logger.info(f"✅ Customer agent started for incoming call")
+            logger.info(f"Customer agent started for incoming call")
 
         # Handle the call with direct Twilio integration
-        logger.info(f"📞 Generating TwiML response for room: {room_id}")
+        logger.info(f"Generating TwiML response for room: {room_id}")
         body, status_code, headers = twilio_manager.handle_incoming_call(webhook_data, room_id)
 
         return Response(content=body, status_code=status_code, media_type=headers.get("Content-Type"))
 
     except Exception as e:
-        logger.error(f"❌ Error in incoming webhook: {e}", exc_info=True)
+        logger.error(f"Error in incoming webhook: {e}", exc_info=True)
         # Return basic error response to avoid dropping the call
         return Response(content="Error processing request", status_code=500)
 
@@ -592,19 +591,19 @@ async def get_sessions():
 #         # Create a test pipeline
 #         from session_manager import create_pipeline
 #         pipeline = create_pipeline("customer")
-        
+
 #         # Check if the model has audio_track property
 #         if not hasattr(pipeline.model, 'audio_track'):
 #             return {"status": "error", "message": "Model does not have audio_track property"}
-            
+
 #         # Check audio_track configuration
 #         audio_track_status = "Not configured"
 #         if pipeline.model.audio_track:
 #             audio_track_status = "Configured"
-            
+
 #         # Check response_modalities
 #         response_modalities = getattr(pipeline.model.config, 'response_modalities', ["unknown"])
-        
+
 #         return {
 #             "status": "success",
 #             "pipeline_type": pipeline.__class__.__name__,
@@ -624,7 +623,7 @@ async def root():
         "message": "SIP A2A Example - Agent-to-Agent Communication over SIP",
         "features": [
             "SIP call handling",
-            "Agent-to-Agent communication", 
+            "Agent-to-Agent communication",
             "Real-time audio processing",
             "Specialist query routing",
             "Call management"
@@ -644,4 +643,4 @@ async def root():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     logger.info(f"Starting SIP A2A Example server on port {port}")
-    uvicorn.run(app, host="0.0.0.0", port=port) 
+    uvicorn.run(app, host="0.0.0.0", port=port)

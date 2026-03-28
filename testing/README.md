@@ -27,8 +27,8 @@ The AI Agent SDK is a Python framework built on top of the VideoSDK Python SDK t
 | 2  | **📞 SIP & Telephony Integration**   | Seamlessly connect agents to phone systems via SIP for call handling, routing, and PSTN access. |
 | 3  | **🧍 Virtual Avatars**               | Add lifelike avatars to enhance interaction and presence using Simli.     |
 | 4  | **🤖 Multi-Model Support**           | Integrate with OpenAI, Gemini, AWS NovaSonic, and more.                    |
-| 5  | **🧩 Cascading Pipeline**            | Integrates with different providers of STT, LLM, and TTS seamlessly.       |
-| 6  | **🧠 Conversational Flow**           | Manages turn detection and VAD for smooth interactions.                    |
+| 5  | **🧩 Pipeline (Cascade Mode)**            | Integrates with different providers of STT, LLM, and TTS seamlessly.       |
+| 6  | **🧠 Pipeline Hooks**           | Manages turn detection and VAD for smooth interactions.                    |
 | 7  | **🛠️ Function Tools**               | Extend agent capabilities with event scheduling, expense tracking, and more. |
 | 8  | **🌐 MCP Integration**               | Connect agents to external data sources and tools using Model Context Protocol. |
 | 9  | **🔗 A2A Protocol**                  | Enable agent-to-agent interactions for complex workflows.                  |
@@ -51,7 +51,7 @@ This architecture shows how AI voice agents connect to VideoSDK meetings. The sy
 Before you begin, ensure you have:
 
 - A VideoSDK authentication token (generate from [app.videosdk.live](https://app.videosdk.live))
-   - A VideoSDK meeting ID (you can generate one using the [Create Room API](https://docs.videosdk.live/api-reference/realtime-communication/create-room) or through the VideoSDK dashboard)
+   - A VideoSDK room ID (you can create one using the [Create Room API](https://docs.videosdk.live/api-reference/realtime-communication/create-room) or through the VideoSDK dashboard)
 - Python 3.12 or higher
 - Third-Party API Keys:
    - API keys for the services you intend to use (e.g., OpenAI for LLM/STT/TTS, ElevenLabs for TTS, Google for Gemini etc.).
@@ -88,9 +88,9 @@ Before you begin, ensure you have:
   👉 Supported plugins (Realtime, LLM, STT, TTS, VAD, Avatar, SIP) are listed in the [Supported Libraries](#supported-libraries-and-plugins) section below.
 
 
-## Generating a VideoSDK Meeting ID
+## Generating a VideoSDK Room ID
 
-Before your AI agent can join a meeting, you'll need to create a meeting ID. You can generate one using the VideoSDK Create Room API:
+Before your AI agent can join a meeting, you'll need to create a room ID. You can create one using the VideoSDK Create Room API:
 
 ### Using cURL
 
@@ -189,17 +189,17 @@ class VoiceAgent(Agent):
 
 ### Step 3: Setting Up the Pipeline
 
-The pipeline connects your agent to an AI model. Here, we are using Google's Gemini for a [Real-time Pipeline](https://docs.videosdk.live/ai_agents/core-components/realtime-pipeline). You could also use a [Cascading Pipeline](https://docs.videosdk.live/ai_agents/core-components/cascading-pipeline).
+The pipeline connects your agent to an AI model. Here, we are using Google's Gemini for a [Pipeline (Realtime Mode)](https://docs.videosdk.live/ai_agents/core-components/pipeline). You could also use a [Pipeline (Cascade Mode)](https://docs.videosdk.live/ai_agents/core-components/pipeline).
 
 
 ```python
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline, JobContext
+from videosdk.agents import Pipeline, JobContext
 
 async def start_session(context: JobContext):
     # Initialize the AI model
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         # When GOOGLE_API_KEY is set in .env - DON'T pass api_key parameter
         api_key="AKZSXXXXXXXXXXXXXXXXXXXX",
         config=GeminiLiveConfig(
@@ -208,7 +208,7 @@ async def start_session(context: JobContext):
         )
     )
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(model=model)
 
     # Continue to the next steps...
 ```
@@ -242,7 +242,7 @@ async def start_session(context: JobContext):
 
 def make_context() -> JobContext:
     room_options = RoomOptions(
-        room_id="<meeting_id>", # Replace it with your actual meetingID
+        room_id="<room_id>", # Replace it with your actual room_id
         auth_token = "<VIDEOSDK_AUTH_TOKEN>", # When VIDEOSDK_AUTH_TOKEN is set in .env - DON'T include videosdk_auth
         name="Test Agent", 
         playground=True,
@@ -266,7 +266,7 @@ After setting up your AI Agent, you'll need a client application to connect with
 - [Flutter](https://github.com/videosdk-live/quickstart/tree/main/flutter-rtc)
 - [iOS](https://github.com/videosdk-live/quickstart/tree/main/ios-rtc)
 
-When setting up your client application, make sure to use the same meeting ID that your AI Agent is using.
+When setting up your client application, make sure to use the same room ID that your AI Agent is using.
 
 ### Step 6: Running the Project
 Once you have completed the setup, you can run your AI Voice Agent project using Python. Make sure your `.env` file is properly configured and all dependencies are installed.
@@ -318,7 +318,7 @@ Explore the following examples to see the framework in action:
       <p>Use case: Answering queries about current weather conditions using an avatar.</p>
     </td>
     <td width="50%" valign="top" style="padding: 10px;">
-      <h3>🛒 <a href="https://github.com/videosdk-community/ai-agent-demo/tree/conversational-flow" target="_blank">Conversational Flow Agent</a></h3>
+      <h3>🛒 <a href="https://github.com/videosdk-community/ai-agent-demo/tree/conversational-flow" target="_blank">Pipeline Hooks Agent</a></h3>
       <p>Use case: E-commerce scenario with turn detection when interrupting the voice agent.</p>
     </td>
   </tr>

@@ -3,22 +3,16 @@
 SERVICE_ACCOUNT_FILE = "service-account-key.json"
 
 # The ID of the Google Spreadsheet where expenses will be logged.
-GOOGLE_CALENDER_ID = "your-google-calender-id" 
-
-# The ID of the VideoSDK meeting where this agent will be used.
-MEETING_ID =  "your-meeting-id" 
+GOOGLE_CALENDER_ID = "your-google-calender-id"
 # --- End of Configuration ---
 
-import asyncio
-import aiohttp
 import os
 import dotenv
 from datetime import datetime
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline
 
 # # Import modules for OpenAI Realtime
 # from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
@@ -31,6 +25,9 @@ from videosdk.agents import RealTimePipeline
 from google.oauth2 import service_account
 from googleapiclient.discovery import build as google_build_service
 from googleapiclient.errors import HttpError as GoogleHttpError
+
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 # Path to the .env file
 dotenv_path = "../.env"
@@ -91,9 +88,9 @@ class MyCalendarAgent(Agent):
             print(f"{error_message}")
             return {"status": "error", "message": error_message}
 
-        # Retrieve the target calendar ID from session context; fall back to environment or 'primary'
-        target_calendar_id = self.session.context.get("google_calendar_id")
-        if not target_calendar_id:
+        # Use the module-level constant for the target calendar ID
+        target_calendar_id = GOOGLE_CALENDER_ID
+        if not target_calendar_id or target_calendar_id == "your-google-calender-id":
             target_calendar_id = "primary"
             print("WARNING: No Google Calendar ID provided. Defaulting to 'primary' calendar.")
 
@@ -134,9 +131,9 @@ class MyCalendarAgent(Agent):
             return {"status": "error", "message": error_message}
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -169,35 +166,22 @@ async def main(context: dict):
 #         )
 #     )
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyCalendarAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        print("Starting Calendar Agent session...")
-        await session.start()
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("KeyboardInterrupt received. Shutting down...")
-    except Exception as e:
-        print(f" FATAL: An unexpected error occurred in main: {e}")
-    finally:
-        print(" Closing Calendar Agent session...")
-        await session.close()
-        print(" Session closed.")
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
 
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="Event Scheduler Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-            "meetingId": MEETING_ID,
-            "name": "Calendar Agent",
-            "google_calendar_id": GOOGLE_CALENDER_ID
-        }
-
     print(" Initializing Calendar Agent...")
-    
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()

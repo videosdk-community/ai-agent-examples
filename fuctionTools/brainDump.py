@@ -3,22 +3,16 @@
 SERVICE_ACCOUNT_FILE = "service-account-key.json"
 
 # The ID of the Google Document where brain dump entries will be saved.
-GOOGLE_DOC_ID = "your-google-doc-id"  
-
-# The ID of the VideoSDK meeting where this agent will be used.
-MEETING_ID =  "your-meeting-id" 
+GOOGLE_DOC_ID = "your-google-doc-id"
 # --- End of Configuration ---
 
-import asyncio
-import aiohttp
 from datetime import datetime
 import os
 import dotenv
-from videosdk.agents import Agent, AgentSession, RealTimePipeline, function_tool
+from videosdk.agents import Agent, AgentSession, Pipeline, function_tool, JobContext, RoomOptions, WorkerJob
 
 # Import modules for Google Gemini Realtime
 from videosdk.plugins.google import GeminiRealtime, GeminiLiveConfig
-from videosdk.agents import RealTimePipeline
 
 # # Import modules for OpenAI Realtime
 # from videosdk.plugins.openai import OpenAIRealtime, OpenAIRealtimeConfig
@@ -31,6 +25,9 @@ from videosdk.agents import RealTimePipeline
 from google.oauth2 import service_account # Import for service account
 from googleapiclient.discovery import build as google_build_service
 from googleapiclient.errors import HttpError as GoogleHttpError
+
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", handlers=[logging.StreamHandler()])
 
 # Path to the .env file
 dotenv_path = "../.env"
@@ -72,10 +69,10 @@ class MyVoiceAgent(Agent):
 
     async def on_enter(self) -> None:
         await self.session.say("Hello, I'm your Brain Dump assistant. Feel free to share your thoughts whenever you're ready. I'm here to listen.")
-    
+
     async def on_exit(self) -> None:
         await self.session.say("Goodbye!")
-        
+
     @function_tool
     async def save_entry_to_google_doc(self, entry_content: str) -> dict:
         """Saves the user's raw brain dump entry to a pre-configured Google Doc.
@@ -86,7 +83,7 @@ class MyVoiceAgent(Agent):
             entry_content: The direct, raw textual dump of everything the user has shared during the session. This should be as close to their spoken words as possible.
         """
         print(f"### Attempting to save brain dump entry (first 100 chars): {entry_content[:100]}...")
-        document_id = self.session.context.get("google_doc_id")
+        document_id = GOOGLE_DOC_ID
 
         if not self.google_creds:
             error_message = "Google credentials not loaded. Cannot save to Google Docs."
@@ -103,13 +100,13 @@ class MyVoiceAgent(Agent):
         try:
             service = google_build_service('docs', 'v1', credentials=self.google_creds)
             today_date_str = datetime.now().strftime("%Y-%m-%d %A")
-            
+
             # Using endOfSegmentLocation: {} with insertText effectively appends.
             # A page break could be inserted for better separation if desired:
             # {'insertPageBreak': {'endOfSegmentLocation': {}}}
             # For now, a clear separator with date.
             content_to_insert_as_page = f"\n\n--- {today_date_str} ---\n\n{entry_content}\n\n"
-            
+
             requests = [
                 {
                     'insertText': {
@@ -118,7 +115,7 @@ class MyVoiceAgent(Agent):
                     }
                 }
             ]
-            
+
             service.documents().batchUpdate(
                 documentId=document_id,
                 body={'requests': requests}
@@ -141,9 +138,9 @@ class MyVoiceAgent(Agent):
             return {"status": "error", "message": error_message}
 
 
-async def main(context: dict):
+async def start_session(context: JobContext):
     model = GeminiRealtime(
-        model="gemini-2.0-flash-live-001",
+        model="gemini-3.1-flash-live-preview",
         config=GeminiLiveConfig(
             voice="Leda", # Puck, Charon, Kore, Fenrir, Aoede, Leda, Orus, and Zephyr.
             response_modalities=["AUDIO"]
@@ -176,30 +173,22 @@ async def main(context: dict):
 #         )
 #     )
 
-    pipeline = RealTimePipeline(model=model)
+    pipeline = Pipeline(llm=model)
     session = AgentSession(
         agent=MyVoiceAgent(),
         pipeline=pipeline,
-        context=context
     )
 
-    try:
-        await session.start()
-        print("Brain Dump Agent started. Waiting for interaction...")
-        await asyncio.Event().wait()
-    except KeyboardInterrupt:
-        print("Shutting down...")
-    finally:
-        await session.close()
+    await session.start(wait_for_participant=True, run_until_shutdown=True)
+
+def make_context() -> JobContext:
+    room_options = RoomOptions(
+        name="Brain Dump Agent",
+        playground=True,
+    )
+    return JobContext(room_options=room_options)
 
 if __name__ == "__main__":
-    def make_context():
-        return {
-            "meetingId": MEETING_ID,
-            "name": "Gemini Brain Dump Agent",
-            "google_doc_id": GOOGLE_DOC_ID
-        }
-    
     print("Starting Brain Dump Agent...")
-
-    asyncio.run(main(context=make_context()))
+    job = WorkerJob(entrypoint=start_session, jobctx=make_context)
+    job.start()
