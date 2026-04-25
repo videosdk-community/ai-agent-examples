@@ -243,7 +243,6 @@ async def start_session(context: JobContext):
 def make_context() -> JobContext:
     room_options = RoomOptions(
         room_id="<room_id>", # Replace it with your actual room_id
-        auth_token = "<VIDEOSDK_AUTH_TOKEN>", # When VIDEOSDK_AUTH_TOKEN is set in .env - DON'T include videosdk_auth
         name="Test Agent", 
         playground=True,
         vision: True # Only available when using the Google Gemini Live API

@@ -11,7 +11,8 @@ dotenv_path = "../.env"
 if os.path.exists(dotenv_path):
     dotenv.load_dotenv(dotenv_path)
 
-VIDEOSDK_TOKEN = os.getenv("VIDEOSDK_AUTH_TOKEN")
+# The Python SDK expects a JWT; generate it from VIDEOSDK_API_KEY and VIDEOSDK_SECRET_KEY
+VIDEOSDK_TOKEN = os.getenv("VIDEOSDK_TOKEN")
 NAME = "VideoSDK Python"
 
 

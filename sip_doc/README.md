@@ -61,7 +61,8 @@ Next, edit the `.env` file with your credentials.
 These are essential for the framework to function.
 
 ```ini
-VIDEOSDK_AUTH_TOKEN=your_videosdk_jwt_token
+VIDEOSDK_API_KEY=your_videosdk_jwt_token
+VIDEOSDK_SECRET_KEY=your_videosdk_jwt_token
 VIDEOSDK_SIP_USERNAME=your_videosdk_sip_username
 VIDEOSDK_SIP_PASSWORD=your_videosdk_sip_password
 ```
@@ -95,7 +96,8 @@ cp env.example .env
 Now, edit the `.env` file:
 ```ini
 # VideoSDK Configuration
-VIDEOSDK_AUTH_TOKEN=your_videosdk_jwt_token
+VIDEOSDK_API_KEY=your_videosdk_jwt_token
+VIDEOSDK_SECRET_KEY=your_videosdk_jwt_token
 VIDEOSDK_SIP_USERNAME=your_videosdk_sip_username
 VIDEOSDK_SIP_PASSWORD=your_videosdk_sip_password
 
@@ -129,7 +131,7 @@ load_dotenv()
 # This function reads your .env variables and configures the correct provider
 sip_manager = create_sip_manager(
     provider=os.getenv("SIP_PROVIDER"),
-    videosdk_token=os.getenv("VIDEOSDK_AUTH_TOKEN"),
+    # videosdk_token is no longer required — the SDK reads VIDEOSDK_API_KEY and VIDEOSDK_SECRET_KEY from the environment.
     # The provider_config dictionary passes provider-specific environment variables.
     provider_config={
         # Twilio

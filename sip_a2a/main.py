@@ -41,7 +41,8 @@ logger.info(f"Logging configured at level: {LOG_LEVEL}")
 def check_environment():
     """Check if all required environment variables are set."""
     required_vars = {
-        "VIDEOSDK_AUTH_TOKEN": "VideoSDK authentication token",
+        "VIDEOSDK_API_KEY": "VideoSDK API key",
+        "VIDEOSDK_SECRET_KEY": "VideoSDK secret key",
         "VIDEOSDK_SIP_USERNAME": "VideoSDK SIP username",
         "VIDEOSDK_SIP_PASSWORD": "VideoSDK SIP password",
         "GOOGLE_API_KEY": "Google API key for Gemini realtime model",
@@ -289,7 +290,8 @@ class TwilioManager:
             os.getenv("TWILIO_AUTH_TOKEN")
         )
         self.from_number = os.getenv("TWILIO_PHONE_NUMBER")
-        self.videosdk = VideoSDKMeeting(os.getenv("VIDEOSDK_AUTH_TOKEN"))
+        # VideoSDKMeeting expects a JWT; generate it from VIDEOSDK_API_KEY and VIDEOSDK_SECRET_KEY
+        self.videosdk = VideoSDKMeeting(os.getenv("VIDEOSDK_TOKEN"))
         self.base_url = None
 
     def set_base_url(self, base_url: str):

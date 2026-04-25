@@ -4,7 +4,7 @@ This folder contains ready-to-use AI agent scripts, each designed for a specific
 
 ## API Key Setup
 - Before running any agent, ensure you have set up your `.env` file with all required API keys:
-  - `VIDEOSDK_AUTH_TOKEN` (from VideoSDK dashboard)
+  - `VIDEOSDK_API_KEY` and `VIDEOSDK_SECRET_KEY` (from VideoSDK dashboard)
   - `OPENAI_API_KEY` (for OpenAI agents)
   - `GOOGLE_API_KEY` (for Gemini/Google agents)
   - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION` (for AWS NovaSonic agents)

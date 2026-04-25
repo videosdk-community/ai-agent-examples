@@ -15,7 +15,7 @@ To get started, make sure you have:
 - **A VideoSDK authentication token**
   - Sign up or log in at [VideoSDK Dashboard](https://app.videosdk.live/)
   - Go to **API Keys** and generate a new token
-  - Copy the token and add it to your `.env` file as `VIDEOSDK_AUTH_TOKEN`
+  - Copy the token and add it to your `.env` file as `VIDEOSDK_API_KEY` and `VIDEOSDK_SECRET_KEY`
 - **API keys for LLM providers and Google integrations**
   - **OpenAI:** Add your OpenAI API key as `OPENAI_API_KEY` in `.env`
   - **Google:** Add your Google API key as `GOOGLE_API_KEY` in `.env` (required for Gemini and Google function tools)
